@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
               backgroundColor: Colors.blue,
               titleTextStyle:
                   TextStyle(fontStyle: FontStyle.italic, fontSize: 24))),
+            
       home: SplashScreen(),
     );
   }
