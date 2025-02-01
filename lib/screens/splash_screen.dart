@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:chit_chat/Api/api.dart";
 import "package:chit_chat/screens/auth/login_screen.dart";
 import "package:chit_chat/screens/home_screen.dart";
 import "package:firebase_auth/firebase_auth.dart";
@@ -24,12 +25,12 @@ class _SplashScreenState extends State<SplashScreen> {
       SystemChrome.setSystemUIOverlayStyle(
           const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
 
-      if (FirebaseAuth.instance.currentUser != null) {
-        print(FirebaseAuth.instance.currentUser);
+      if (Api.auth.currentUser != null) {
+        print(Api.auth.currentUser);
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const HomeScreen()));
       } else {
-        print(FirebaseAuth.instance.currentUser);
+        print(Api.auth.currentUser);
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       }

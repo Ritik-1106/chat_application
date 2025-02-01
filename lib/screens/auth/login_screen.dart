@@ -1,12 +1,14 @@
+import "dart:io";
 import "dart:math";
 
+import "package:chit_chat/Api/api.dart";
+import "package:chit_chat/helper/dialogue.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:google_sign_in/google_sign_in.dart";
 import 'dart:developer';
-
 
 import "../home_screen.dart";
 
@@ -30,30 +32,48 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   _signInGoogleBtnClick() {
+    // my progress indicator are showing
+    Dialogue.progressIndicator(context);
     _signInWithGoogle().then((user) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      // my progress bar hiding or remove from stack 
+      Navigator.pop(context);
+      if (user != null) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      }
     });
   }
 
   // google sign in code here
-
-  Future<UserCredential> _signInWithGoogle() async {
+  Future<UserCredential?> _signInWithGoogle() async {
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    try {
+      // internet permission
+      await InternetAddress.lookup('google.com');
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
 
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
 
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+      // Once signed in, return the UserCredential
+      return await Api.auth.signInWithCredential(credential);
+    } catch (e) {
+      print("this is error in catch block");
+      print(e.toString());
+      Dialogue.showSnakbar(
+          context,
+          "somethig went wrong check internet connection",
+          Icons.e_mobiledata,
+          30);
+      return null;
+    }
   }
 
   @override
@@ -83,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     _signInGoogleBtnClick();
                   },
                   label: Text(
-                    "Log In With Google",
+                    "Sign In With Google",
                     style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
                   ),
                   icon: Image.asset(
