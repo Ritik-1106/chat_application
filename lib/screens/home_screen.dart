@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
           CupertinoIcons.home,
           color: Colors.white,
         ),
-        title: Text("chate kro"),
+        title: Text("Chit Chat", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),),
         actions: [
           IconButton(
               onPressed: () {}, icon: Icon(Icons.search, color: Colors.white)),
