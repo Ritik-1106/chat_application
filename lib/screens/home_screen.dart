@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:chit_chat/Api/api.dart";
 import "package:chit_chat/helper/dialogue.dart";
 import "package:chit_chat/screens/auth/login_screen.dart";
@@ -48,17 +50,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     context, "User Has Sign out", Icons.back_hand_rounded, 25);
               } catch (e) {
                 Dialogue.showSnakbar(
-                context, "kuch toh gadbad h daya", Icons.error, 30);
+                    context, "kuch toh gadbad h daya", Icons.error, 30);
               }
             },
             backgroundColor: Colors.blue,
             child: Icon(Icons.add, color: Colors.white)),
       ),
-      body: ListView.builder(
-          itemCount: 16,
-          physics: BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return ChatUserCard();
+      body: StreamBuilder(
+          // using steam parameter we load to data
+
+          stream: Api.firestore.collection('users').snapshots(),
+          builder: (context, snapshot) {
+            final list = [];
+            // if snapshot has data
+            if (snapshot.hasData) {
+              // data should not be null otherwise you will get error
+              final data = snapshot.data?.docs;
+              for (var i in data!) {
+                print(jsonEncode(i.data())); 
+                list.add(i.data()['name']);
+              }
+            }
+            return ListView.builder(
+                itemCount: list.length,
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Text(list[index]);
+                });
           }),
     );
   }
