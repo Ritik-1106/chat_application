@@ -34,12 +34,19 @@ class _LoginScreenState extends State<LoginScreen> {
   _signInGoogleBtnClick() {
     // my progress indicator are showing
     Dialogue.progressIndicator(context);
-    _signInWithGoogle().then((user) {
-      // my progress bar hiding or remove from stack 
+    _signInWithGoogle().then((user) async {
+      // my progress bar hiding or remove from stack
       Navigator.pop(context);
       if (user != null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => HomeScreen()));
+        if (await Api.userExist()) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => HomeScreen()));
+        } else {
+          Api.createUser().then((onValue) {
+            Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => HomeScreen()));
+          });
+        }
       }
     });
   }
