@@ -1,13 +1,9 @@
-import "dart:convert";
-
 import "package:chit_chat/Api/api.dart";
 import "package:chit_chat/helper/dialogue.dart";
 import "package:chit_chat/models/Chat_User.dart";
 import "package:chit_chat/screens/auth/login_screen.dart";
 import "package:chit_chat/screens/profile_screen.dart";
 import "package:chit_chat/widgets/chat_user_card.dart";
-import "package:firebase_auth/firebase_auth.dart";
-import "package:firebase_core/firebase_core.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:google_sign_in/google_sign_in.dart";
@@ -20,7 +16,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<ChatUser> list = [];
+  List<ChatUser> _list = [];
+  // it store search items
+  final List<ChatUser> _searchList = [];
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -32,52 +31,82 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 0,
         leading: Icon(
-          CupertinoIcons.home,
+          _isSearching ? null : CupertinoIcons.home,
           color: Colors.white,
         ),
-        title: Text("chate kro"),
+        title: _isSearching
+            ? TextField(
+                cursorColor: Colors.white70,
+                style: TextStyle(fontSize: 16, color: Colors.white),
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(borderSide: BorderSide.none),
+                    hintText: 'Search Name or Email',
+                    hintStyle: TextStyle(color: Colors.white60)),
+                onChanged: (value) {
+                  setState(() {
+                    _searchList.clear(); // Clear previous search results
+                    for (var i in _list) {
+                      // Convert both to lowercase for case-insensitive search
+                      if (i.name!.toLowerCase().contains(value.toLowerCase()) ||
+                          i.email!
+                              .toLowerCase()
+                              .contains(value.toLowerCase())) {
+                        _searchList.add(i);
+                      }
+                    }
+                  });
+                })
+            : Text("Chit Chat"),
         actions: [
           IconButton(
-              onPressed: () {}, icon: Icon(Icons.search, color: Colors.white)),
+              onPressed: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                });
+              },
+              icon: Icon(
+                  _isSearching
+                      ? CupertinoIcons.clear_circled_solid
+                      : Icons.search,
+                  color: Colors.white)),
 
           // popup button
-
-          PopupMenuButton(
-              color: Colors.white,
-              onSelected: (value) async {
-                if (value == "Profile") {
-                  // print("prfile options clicked");
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              ProfileScreen(user: Api.selfuserinfo)));
-                } else if (value == 'Logout') {
-                  // Perform Logout
-                  await Api.auth.signOut().then((onValue) async {
-                    await GoogleSignIn().signOut().then((onValue) {
-                         // replacing home screen with login screen
-                    Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => LoginScreen()));
-                    
-
+          if (!_isSearching)
+            PopupMenuButton(
+                color: Colors.white,
+                onSelected: (value) async {
+                  if (value == "Profile") {
+                    // print("prfile options clicked");
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                ProfileScreen(user: Api.selfuserinfo)));
+                  } else if (value == 'Logout') {
+                    // Perform Logout
+                    await Api.auth.signOut().then((onValue) async {
+                      await GoogleSignIn().signOut().then((onValue) {
+                        // replacing home screen with login screen
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (_) => LoginScreen()));
+                      });
                     });
-                  });
-                }
-              },
-              itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'Profile',
-                      child: Text(
-                        "User Profile",
-                        style: TextStyle(
-                            fontSize: 14, fontStyle: FontStyle.normal),
+                  }
+                },
+                itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'Profile',
+                        child: Text(
+                          "User Profile",
+                          style: TextStyle(
+                              fontSize: 14, fontStyle: FontStyle.normal),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(value: 'Logout', child: Text("Log Out ")),
-                  ],
-              icon: Icon(Icons.more_vert, color: Colors.white)),
+                      PopupMenuItem(value: 'Logout', child: Text("Log Out ")),
+                    ],
+                icon: Icon(Icons.more_vert, color: Colors.white)),
         ],
       ),
       floatingActionButton: Padding(
@@ -116,18 +145,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 final data = snapshot.data?.docs;
                 // contain data in list
                 // convert data from json to chatuser format
-                list = data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
-                    [];
+                _list =
+                    data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
+                        [];
 
                 //  if list is empty i need to some text
-                if (list.isNotEmpty) {
+
+                print(_searchList.length);
+                print(_list.length);
+                if (_list.isNotEmpty) {
                   return ListView.builder(
-                      itemCount: list.length,
+                      // if issearch is true so we will show searchlist otherwise list
+                      itemCount:
+                          _isSearching ? _searchList.length : _list.length,
                       physics: BouncingScrollPhysics(),
                       itemBuilder: (context, index) {
                         return ChatUserCard(
-                          user: list[index],
-                        );
+                            user: _isSearching
+                                ? _searchList[index]
+                                : _list[index]);
                         // return Text(list[index]);
                       });
                 } else {
