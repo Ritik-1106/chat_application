@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _isSearching ? null : CupertinoIcons.home,
           color: Colors.white,
         ),
+
         title: _isSearching
             ? TextField(
                 cursorColor: Colors.white70,
@@ -58,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   });
                 })
-            : Text("Chit Chat"),
+            : Text("Chit Chat")
+        title: Text("Chit Chat", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),),
         actions: [
           IconButton(
               onPressed: () {
