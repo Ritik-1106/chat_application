@@ -59,8 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   });
                 })
-            : Text("Chit Chat")
-        title: Text("Chit Chat", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),),
+            : Text("Chit Chat", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500)
+        ,
+        ),
         actions: [
           IconButton(
               onPressed: () {
