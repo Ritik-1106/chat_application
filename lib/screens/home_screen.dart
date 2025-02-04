@@ -1,5 +1,4 @@
 import "package:chit_chat/Api/api.dart";
-import "package:chit_chat/helper/dialogue.dart";
 import "package:chit_chat/models/Chat_User.dart";
 import "package:chit_chat/screens/auth/login_screen.dart";
 import "package:chit_chat/screens/profile_screen.dart";
@@ -184,10 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           }
                       }
-              }
-            )
-          )
-       )
-     );
+                    }))));
   }
+
 }

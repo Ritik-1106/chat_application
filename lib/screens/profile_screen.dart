@@ -1,5 +1,6 @@
 //
 
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chit_chat/Api/api.dart';
 import 'package:chit_chat/helper/Dialogue.dart';
@@ -8,6 +9,7 @@ import 'package:chit_chat/screens/auth/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   // we need to create user of ChatUser model
@@ -21,6 +23,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   // i need to global key to control on widget like textformwidget
   final GlobalKey<FormState> _formkey = GlobalKey();
+  final ImagePicker picker = ImagePicker();
+  String? _image;
   @override
   Widget build(BuildContext context) {
     final Size screensize = MediaQuery.of(context).size;
@@ -47,28 +51,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: screensize.height * .05),
                   Stack(
                     children: [
-                      ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(screensize.height * .1),
-                        child: CachedNetworkImage(
-                          height: screensize.width * 0.3,
-                          width: screensize.width * 0.3,
-                          fit: BoxFit.cover,
-                          imageUrl: widget.user.image.toString(),
-                          // placeholder: (context, url) => CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => CircleAvatar(
-                            backgroundColor: Colors.grey.shade300,
-                            child: Icon(CupertinoIcons.person),
-                          ),
-                        ),
-                      ),
+                      _image != null
+                          ? ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(screensize.height * .1),
+                              child: Image.file(
+                                File(_image!),
+                                height: screensize.width * 0.3,
+                                width: screensize.width * 0.3,
+                                fit: BoxFit.cover,
+                              ))
+                          : ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(screensize.height * .1),
+                              child: CachedNetworkImage(
+                                height: screensize.width * 0.3,
+                                width: screensize.width * 0.3,
+                                fit: BoxFit.cover,
+                                imageUrl: widget.user.image.toString(),
+                                // placeholder: (context, url) => CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    CircleAvatar(
+                                  backgroundColor: Colors.grey.shade300,
+                                  child: Icon(CupertinoIcons.person),
+                                ),
+                              ),
+                            ),
                       Positioned(
                         bottom: 0,
                         right: 0,
                         child: MaterialButton(
                           shape: CircleBorder(),
                           color: Colors.white,
-                          onPressed: () {},
+                          onPressed: () {
+                            _showBottomSheet();
+                          },
                           child: Icon(Icons.edit, color: Colors.blue, size: 20),
                         ),
                       )
@@ -189,5 +206,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  //  show model bottom sheet that will provide pick image option from gallery and file manager
+  void _showBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        builder: (_) {
+          return ListView(
+            shrinkWrap: true,
+            padding: EdgeInsets.only(top: 30, bottom: 100),
+            children: [
+              Text(
+                "Pick Profile Picture",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 25,
+                    color: Colors.black,
+                    fontStyle: FontStyle.normal),
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                      onPressed: () async {
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.camera);
+                          if (image != null) {
+                          // if image is not so i am gonna remove this bottom sheet from screen so i will pop
+                          setState(() {
+                          // update to current selected image path in global variable
+                            _image = image.path;
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          fixedSize: Size(110, 110)),
+                      child: Image.asset(
+                        "images/camera01.png",
+                        fit: BoxFit.cover,
+                      )),
+                  ElevatedButton(
+                      onPressed: () async {
+                        // Pick an image.
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          print(image.path);
+                          // if image is not so i am gonna remove this bottom sheet from screen so i will pop
+                          setState(() {
+                            // update to current selected image path in global variable
+                            _image = image.path;
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          fixedSize: Size(110, 110)),
+                      child: Image.asset(
+                        "images/gallery.png",
+                        fit: BoxFit.cover,
+                      ))
+                ],
+              )
+            ],
+          );
+        });
   }
 }
