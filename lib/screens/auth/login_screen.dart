@@ -8,7 +8,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:google_sign_in/google_sign_in.dart";
-import 'dart:developer';
+import "dart:developer";
 
 import "../home_screen.dart";
 
@@ -33,18 +33,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _signInGoogleBtnClick() {
     // my progress indicator are showing
+    print("heloo sun rhah mc");
     Dialogue.progressIndicator(context);
     _signInWithGoogle().then((user) async {
       // my progress bar hiding or remove from stack
       Navigator.pop(context);
+      print("kya bhai tu null h kya meetha h kya");
+      print(user);
+      if (user == null) {
+        print("bhag ja re nulle teri mc");
+      }
       if (user != null) {
         if (await Api.userExist()) {
+          print("this user does exist #{Api.userExist()}");
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (_) => HomeScreen()));
         } else {
+          print("user first time creating");
           Api.createUser().then((onValue) {
             Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => HomeScreen()));
+                context, MaterialPageRoute(builder: (_) => HomeScreen()));
           });
         }
       }
@@ -106,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
               top: mq.height * .66,
               child: ElevatedButton.icon(
                   onPressed: () {
+                    print("sun le behen ke lode");
                     // this function will call while click sign in with google button
                     _signInGoogleBtnClick();
                   },
