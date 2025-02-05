@@ -22,12 +22,15 @@ class _ChatUserCardState extends State<ChatUserCard> {
           horizontal: screensize.width * .020, vertical: 5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          
+        },
         child: ListTile(
           // why we use widget because widget refer state 
           title: Text(widget.user.name.toString()),
           subtitle: Text(
-            widget.user.about.toString(),
+            widget.user.biodata
+            .toString(),
             maxLines: 1,
             style: TextStyle(color: Colors.black54),
           ),

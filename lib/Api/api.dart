@@ -1,6 +1,7 @@
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer';
 
 class Api {
   static FirebaseAuth auth = FirebaseAuth.instance;
@@ -42,9 +43,9 @@ class Api {
         email: user.email,
         image: user.photoURL.toString(),
         createAt: time.toString(),
-        about: "i am busy only on call",
         isOnline: false,
         lastActive: time.toString(),
+        biodata: "love......",
         pushToken: "");
     // we will return data to convert into json format
     return await firestore
@@ -61,8 +62,10 @@ class Api {
   }
 
   static updateInfo() {
-    return Api.firestore.collection('users').doc(user.uid).update({'name': selfuserinfo.name,
-    'about': selfuserinfo.about
-    });
+    print("chal bhai tu update kr");
+    return Api.firestore
+        .collection('users')
+        .doc(user.uid)
+        .update({'name': selfuserinfo.name, 'biodata': selfuserinfo.biodata});
   }
 }

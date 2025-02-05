@@ -129,10 +129,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             borderSide: BorderSide(color: Colors.blue))),
                   ),
                   SizedBox(height: screensize.height * .03),
+
                   TextFormField(
-                    initialValue: widget.user.about,
+                    initialValue: widget.user.biodata,
                     onSaved: (newValue) {
-                      Api.selfuserinfo.about = newValue ?? "";
+                      Api.selfuserinfo.biodata = newValue ?? "";
                     },
 
                     // i want to use or apply some condition using validator
@@ -164,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         if (_formkey.currentState!.validate()) {
                           _formkey.currentState!.save();
                           Api.updateInfo().then((value) {
-                            Dialogue.showSnakbar(context, "Updated Succesfully",
+                               Dialogue.showSnakbar(context, "Updated Succesfully",
                                 Icons.update, 25);
                           });
                         }
@@ -239,10 +240,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () async {
                         final XFile? image =
                             await picker.pickImage(source: ImageSource.camera);
-                          if (image != null) {
+                        if (image != null) {
                           // if image is not so i am gonna remove this bottom sheet from screen so i will pop
                           setState(() {
-                          // update to current selected image path in global variable
+                            // update to current selected image path in global variable
                             _image = image.path;
                           });
                           Navigator.pop(context);
