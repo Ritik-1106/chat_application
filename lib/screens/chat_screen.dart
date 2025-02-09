@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chit_chat/Api/api.dart';
 import 'package:chit_chat/models/Chat_User.dart';
+import 'package:chit_chat/models/Message.dart';
+import 'package:chit_chat/widgets/message_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +19,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  List<Message> _list = [];
+  final _texteditingcontroller = TextEditingController();
+
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 300), () {
@@ -27,6 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.blue.shade100,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           flexibleSpace: _appbar(),
@@ -36,34 +45,30 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: StreamBuilder(
                   // using steam parameter we load to data
-                  stream: null,
-                  // stream: Api.getAllUser(),
+                  stream: Api.getAllMessages(widget.user),
                   builder: (context, snapshot) {
                     //  check load user data on screen
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                       case ConnectionState.none:
-                      // return Center(child: CircularProgressIndicator());
-
+                        return Center(child: CircularProgressIndicator());
                       case ConnectionState.active:
                       case ConnectionState.done:
-                        // final data = snapshot.data?.docs;
+                        final data = snapshot.data?.docs;
+                        // print("data: ${jsonEncode(data![0].data())}");
                         // contain data in list
                         // convert data from json to chatuser format
-                        // _list = data
-                        //         ?.map((e) => ChatUser.fromJson(e.data()))
-                        //         .toList() ??
-                        //     [];
+                        _list = data?.map((e) => Message.fromJson(e.data()))
+                                .toList() ??
+                            [];
 
-                        //  if list is empty i need to some text
-                        final _list = ["sam", "v"];
                         if (_list.isNotEmpty) {
                           return ListView.builder(
                               // if issearch is true so we will show searchlist otherwise list
                               itemCount: _list.length,
                               physics: BouncingScrollPhysics(),
                               itemBuilder: (context, index) {
-                                return Text(_list[index]);
+                                return MessageCard(message: _list[index]);
                               });
                         } else {
                           return Center(
@@ -158,6 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           size: 25, color: Colors.blue)),
                   Expanded(
                       child: TextField(
+                          controller: _texteditingcontroller,
                           cursorColor: Colors.blue,
                           keyboardType: TextInputType.multiline,
                           maxLines: null,
@@ -183,11 +189,16 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           MaterialButton(
+            onPressed: () {
+              if (_texteditingcontroller.text.isNotEmpty) {
+                Api.sendMessage(widget.user, _texteditingcontroller.text);
+                _texteditingcontroller.text = '';
+              }
+            },
             color: Colors.blue,
             minWidth: 0,
             shape: CircleBorder(),
             padding: EdgeInsets.only(left: 10, bottom: 10, top: 10, right: 2),
-            onPressed: () {},
             child: Icon(Icons.send, color: Colors.white, size: 30),
           )
         ],

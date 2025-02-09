@@ -1,4 +1,5 @@
 import 'package:chit_chat/models/Chat_User.dart';
+import 'package:chit_chat/models/Message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer';
@@ -20,7 +21,6 @@ class Api {
   }
 
   // for current user info
-
   static Future<void> getSelfInfo() async {
     await firestore.collection('users').doc(user.uid).get().then((user) async {
       if (user.exists) {
@@ -67,5 +67,35 @@ class Api {
         .collection('users')
         .doc(user.uid)
         .update({'name': selfuserinfo.name, 'biodata': selfuserinfo.biodata});
+  }
+
+// chat screen related api
+  // chats(collection) => conversation_id(doc) => messages(collection) => message(doc)
+
+  static String getConversationID(String id) => user.uid.hashCode <= id.hashCode
+      ? '${user.uid}_$id'
+      : '${id}_${user.uid}';
+
+  // this api basically retrive all messages
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
+      ChatUser user) {
+    return Api.firestore
+        .collection('chats/${getConversationID(user.id!)}/messages/')
+        .snapshots();
+  }
+
+  // for sending messages
+  static Future<void> sendMessage(ChatUser chatuser, String msg) async {
+  final time = DateTime.now().millisecondsSinceEpoch;
+
+  final Message message = Message(
+        told: chatuser.id,
+        sent: time.toString(),
+        fromid: user.uid,
+        msg: msg,
+        read: '',
+        type: "String");
+        final ref = firestore.collection('chats/${getConversationID(chatuser.id!)}/messages/');
+        await ref.doc(time.toString()).set(message.toJson());
   }
 }
