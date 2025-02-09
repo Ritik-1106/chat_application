@@ -130,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 body: StreamBuilder(
                     // using steam parameter we load to data
-
                     stream: Api.getAllUser(),
                     builder: (context, snapshot) {
                       //  check load user data on screen
@@ -148,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ?.map((e) => ChatUser.fromJson(e.data()))
                                   .toList() ??
                               [];
-
                           //  if list is empty i need to some text
                           if (_list.isNotEmpty) {
                             return ListView.builder(
