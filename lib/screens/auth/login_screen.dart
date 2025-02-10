@@ -55,6 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 context, MaterialPageRoute(builder: (_) => HomeScreen()));
           });
         }
+
+        // after login we will isonline as true 
+        Api.loginUser();
+        
       }
     });
   }

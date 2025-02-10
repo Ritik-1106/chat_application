@@ -86,16 +86,50 @@ class Api {
 
   // for sending messages
   static Future<void> sendMessage(ChatUser chatuser, String msg) async {
-  final time = DateTime.now().millisecondsSinceEpoch;
+    final time = DateTime.now().millisecondsSinceEpoch;
 
-  final Message message = Message(
+    final Message message = Message(
         told: chatuser.id,
         sent: time.toString(),
         fromid: user.uid,
         msg: msg,
         read: '',
         type: "String");
-        final ref = firestore.collection('chats/${getConversationID(chatuser.id!)}/messages/');
-        await ref.doc(time.toString()).set(message.toJson());
+    final ref = firestore
+        .collection('chats/${getConversationID(chatuser.id!)}/messages/');
+    await ref.doc(time.toString()).set(message.toJson());
+  }
+
+  // for updating read messages
+  static Future<void> updateMessagesReadStatus(Message msg) async {
+    firestore
+        .collection('chats/${getConversationID(msg.fromid!)}/messages/')
+        .doc(msg.sent)
+        .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+  }
+
+// i want to show last msg
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessages(
+      ChatUser user) {
+    return Api.firestore
+        .collection('chats/${getConversationID(user.id!)}/messages/')
+        .orderBy('sent', descending: true)
+        .limit(1)
+        .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUnreadMessages(
+      ChatUser user) {
+    return Api.firestore
+        .collection('chats/${getConversationID(user.id!)}/messages/')
+        .where('read', isEqualTo: "") // Filter unread messages
+        .snapshots();
+  }
+
+ static Future<void> loginUser() async {
+    final current_user = auth.currentUser;
+    await firestore.collection('users').doc(current_user!.uid).update({
+      'isOnline': true
+    });
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chit_chat/Api/api.dart';
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:chit_chat/models/Message.dart';
 import 'package:chit_chat/widgets/message_card.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Message> _list = [];
   final _texteditingcontroller = TextEditingController();
 
+  bool _isshowEmoji = false;
+
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 300), () {
@@ -33,56 +37,111 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.blue.shade100,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: _appbar(),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                  // using steam parameter we load to data
-                  stream: Api.getAllMessages(widget.user),
-                  builder: (context, snapshot) {
-                    //  check load user data on screen
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.none:
-                        return Center(child: CircularProgressIndicator());
-                      case ConnectionState.active:
-                      case ConnectionState.done:
-                        final data = snapshot.data?.docs;
-                        // print("data: ${jsonEncode(data![0].data())}");
-                        // contain data in list
-                        // convert data from json to chatuser format
-                        _list = data?.map((e) => Message.fromJson(e.data()))
-                                .toList() ??
-                            [];
-
-                        if (_list.isNotEmpty) {
-                          return ListView.builder(
-                              // if issearch is true so we will show searchlist otherwise list
-                              itemCount: _list.length,
-                              physics: BouncingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                return MessageCard(message: _list[index]);
-                              });
-                        } else {
-                          return Center(
-                              child: Text("Say Hii",
-                                  style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black54)));
-                        }
-                    }
-                  }),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: SafeArea(
+        // with the help of popscope when you try to back first of 
+        //all emoji section will hide and you will back from screen 
+        child: PopScope(
+            canPop: !_isshowEmoji,
+            onPopInvokedWithResult: (didPop, result) {
+              if (_isshowEmoji) {
+                setState(() {
+                  _isshowEmoji = !_isshowEmoji;
+                });
+              } else {
+                // Exit the app if not searching
+                Navigator.of(context).maybePop();
+              }
+            },
+            child: Scaffold(
+            backgroundColor: Colors.blue.shade100,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: _appbar(),
             ),
-            _chatInput()
-          ],
+            body: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder(
+                      // using steam parameter we load to data
+                      stream: Api.getAllMessages(widget.user),
+                      builder: (context, snapshot) {
+                        //  check load user data on screen
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return Center(child: CircularProgressIndicator());
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            final data = snapshot.data?.docs;
+                            // print("data: ${jsonEncode(data![0].data())}");
+                            // contain data in list
+                            // convert data from json to chatuser format
+                            _list = data
+                                    ?.map((e) => Message.fromJson(e.data()))
+                                    .toList() ??
+                                [];
+          
+                            if (_list.isNotEmpty) {
+                              return ListView.builder(
+                                  // if issearch is true so we will show searchlist otherwise list
+                                  itemCount: _list.length,
+                                  physics: BouncingScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    return MessageCard(message: _list[index]);
+                                  });
+                            } else {
+                              return Center(
+                                  child: Text("Say Hii",
+                                      style: TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black54)));
+                            }
+                        }
+                      }),
+                ),
+                _chatInput(),
+                // this code to show emoji
+                if (_isshowEmoji)
+                  SizedBox(
+                    height: 200,
+                    child: EmojiPicker(
+                      textEditingController:
+                          _texteditingcontroller, // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
+                      config: Config(
+                        height: 200,
+                        checkPlatformCompatibility: true,
+                        emojiViewConfig: EmojiViewConfig(
+                          // Issue: https://github.com/flutter/flutter/issues/28894
+                          emojiSizeMax: 28 * (Platform.isIOS ? 1.20 : 1.0),
+                        ),
+                        viewOrderConfig: const ViewOrderConfig(
+                          top: EmojiPickerItem.categoryBar,
+                          middle: EmojiPickerItem.emojiView,
+                          bottom: EmojiPickerItem.searchBar,
+                        ),
+                        skinToneConfig: const SkinToneConfig(),
+                        categoryViewConfig: const CategoryViewConfig(),
+                        bottomActionBarConfig: const BottomActionBarConfig(
+                            buttonColor: Colors.white,
+                            buttonIconColor: Colors.blue,
+                            backgroundColor: Colors.white),
+                        searchViewConfig: const SearchViewConfig(
+                          hintText: "Search Emoji",
+                          hintTextStyle:
+                              TextStyle(fontSize: 20, color: Colors.black54),
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -123,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Ritik Nagar",
+                widget.user.name.toString(),
                 style: TextStyle(
                     fontSize: 16,
                     letterSpacing: 1.0,
@@ -132,7 +191,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               SizedBox(height: 1),
               Text(
-                "Ritik Nagar",
+                "ritik Nagar",
                 style: TextStyle(
                     fontSize: 14,
                     letterSpacing: 1.0,
@@ -158,11 +217,26 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 children: [
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          // it will change value if false so it will true
+                          _isshowEmoji = !_isshowEmoji;
+                        });
+                      },
                       icon: Icon(Icons.emoji_emotions,
                           size: 25, color: Colors.blue)),
                   Expanded(
                       child: TextField(
+                          onTap: () {
+                            if (_isshowEmoji) {
+                              // isemoji is true it means emoji keyborad is open first we need to close 
+                              // then open simple keyboard 
+                              setState(() {
+                                _isshowEmoji = !_isshowEmoji;
+                              });
+                            }
+                          },
                           controller: _texteditingcontroller,
                           cursorColor: Colors.blue,
                           keyboardType: TextInputType.multiline,
