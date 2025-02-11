@@ -32,6 +32,9 @@ dependencies:
   # it is used pick image from firebase cloud 
   image_picker: ^1.1.2
 
+  # for showing emoji 
+  emoji_picker_flutter: ^4.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
