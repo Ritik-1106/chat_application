@@ -89,9 +89,19 @@ class _MessageCardState extends State<MessageCard> {
             margin: EdgeInsets.all(screensize.width * .04),
             padding: EdgeInsets.all(screensize.width * .04),
             child: Text(widget.message.msg.toString(),
+<<<<<<< Updated upstream
                 style: TextStyle(
                     fontSize: 15, letterSpacing: 1.0, color: Colors.black)),
+=======
+<<<<<<< Updated upstream
+                style: TextStyle(fontSize: 15, letterSpacing: 1.0, color: Colors.black)),
+>>>>>>> Stashed changes
             decoration: BoxDecoration(
+=======
+                style: TextStyle(
+                    fontSize: 18, letterSpacing: 1.0, color: Colors.black))
+            ,decoration: BoxDecoration(
+>>>>>>> Stashed changes
               color: Colors.grey.shade300,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(45),

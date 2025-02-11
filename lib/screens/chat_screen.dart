@@ -37,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< Updated upstream
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -61,6 +62,96 @@ class _ChatScreenState extends State<ChatScreen> {
             appBar: AppBar(
               automaticallyImplyLeading: false,
               flexibleSpace: _appbar(),
+=======
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.blue.shade100,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          flexibleSpace: _appbar(),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                  // using steam parameter we load to data
+                  stream: Api.getAllMessages(widget.user),
+                  builder: (context, snapshot) {
+                    //  check load user data on screen
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                      case ConnectionState.none:
+                        return Center(child: CircularProgressIndicator());
+                      case ConnectionState.active:
+                      case ConnectionState.done:
+                        final data = snapshot.data?.docs;
+                        // print("data: ${jsonEncode(data![0].data())}");
+                        // contain data in list
+                        // convert data from json to chatuser format
+                        _list = data?.map((e) => Message.fromJson(e.data()))
+                                .toList() ??
+                            [];
+
+                        if (_list.isNotEmpty) {
+                          return ListView.builder(
+                              // if issearch is true so we will show searchlist otherwise list
+                              itemCount: _list.length,
+                              physics: BouncingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                return MessageCard(message: _list[index]);
+                              });
+                        } else {
+                          return Center(
+                              child: Text("Say Hii",
+                                  style: TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black54)));
+                        }
+<<<<<<< Updated upstream
+                    }
+                  }),
+=======
+                      }),
+                ),
+                _chatInput(),
+                // this code to show emoji
+                if (_isshowEmoji)
+                  SizedBox(
+                    height: 200,
+                    child: EmojiPicker(
+                      textEditingController:
+                          _texteditingcontroller, // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
+                      config: Config(
+                        height: 200,
+                        checkPlatformCompatibility: true,
+                        emojiViewConfig: EmojiViewConfig(
+                          // Issue: https://github.com/flutter/flutter/issues/28894
+                          emojiSizeMax: 28 * (Platform.isIOS ? 1.40 : 1.15),
+                        ),
+                        viewOrderConfig: const ViewOrderConfig(
+                          top: EmojiPickerItem.categoryBar,
+                          middle: EmojiPickerItem.emojiView,
+                          bottom: EmojiPickerItem.searchBar,
+                        ),
+                        skinToneConfig: const SkinToneConfig(),
+                        categoryViewConfig: const CategoryViewConfig(),
+                        bottomActionBarConfig: const BottomActionBarConfig(
+                            buttonColor: Colors.white,
+                            buttonIconColor: Colors.blue,
+                            backgroundColor: Colors.white),
+                        searchViewConfig: const SearchViewConfig(
+                          hintText: "Search Emoji",
+                          hintTextStyle:
+                              TextStyle(fontSize: 20, color: Colors.black54),
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )
+              ],
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
             ),
             body: Column(
               children: [
