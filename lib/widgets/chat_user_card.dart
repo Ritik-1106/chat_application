@@ -4,6 +4,7 @@ import 'package:chit_chat/helper/mydatetimeutil.dart';
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:chit_chat/models/Message.dart';
 import 'package:chit_chat/screens/chat_screen.dart';
+import 'package:chit_chat/widgets/profile_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class _ChatUserCardState extends State<ChatUserCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
           onTap: () {
-          Navigator.push(
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (_) => ChatScreen(user: widget.user)));
@@ -55,17 +56,23 @@ class _ChatUserCardState extends State<ChatUserCard> {
                       maxLines: 1,
                       style: TextStyle(color: Colors.black54),
                     ),
-                    leading: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(screensize.height * 0.3),
-                      child: CachedNetworkImage(
-                        height: screensize.width * 0.14,
-                        width: screensize.width * 0.14,
-                        imageUrl: widget.user.image.toString(),
-                        // placeholder: (context, url) => CircularProgressIndicator(),
-                        errorWidget: (context, url, error) => CircleAvatar(
-                          backgroundColor: Colors.grey.shade300,
-                          child: Icon(CupertinoIcons.person),
+                    leading: InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context, builder: (_) => ProfileDialog(user: widget.user));
+                      },
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(screensize.height * 0.3),
+                        child: CachedNetworkImage(
+                          height: screensize.width * 0.14,
+                          width: screensize.width * 0.14,
+                          imageUrl: widget.user.image.toString(),
+                          // placeholder: (context, url) => CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundColor: Colors.grey.shade300,
+                            child: Icon(CupertinoIcons.person),
+                          ),
                         ),
                       ),
                     ),
@@ -79,11 +86,11 @@ class _ChatUserCardState extends State<ChatUserCard> {
                                 builder: (context, snapshot) {
                                   if (!snapshot.hasData) {
                                     return SizedBox(); // No unread messages, hide the blue dot
-                                  } 
-                                int unreadCount = snapshot.data!.docs.length ;
+                                  }
+                                  int unreadCount = snapshot.data!.docs.length;
                                   return Container(
-                                    padding: EdgeInsets.all(
-                                        screensize.width * .001),
+                                    padding:
+                                        EdgeInsets.all(screensize.width * .001),
                                     height: 20,
                                     width: 20,
                                     decoration: BoxDecoration(
@@ -102,22 +109,14 @@ class _ChatUserCardState extends State<ChatUserCard> {
                                   );
                                 },
                               )
-                            : 
-                            
-                            Text(
- 
+                            : Text(
                                 Mydatetimeutil.getlastMessageTime(
                                     context: context,
                                     sent_time: _message!.sent.toString()),
                                 style: TextStyle(
                                     fontSize: 15, color: Colors.black54),
-                              
-                              
-                              )
-                            );
-                          }
-                        )
-                      ),
-                    );
-                  }
+                              ));
+              })),
+    );
+  }
 }
