@@ -61,6 +61,23 @@ class Api {
         .snapshots();
   }
 
+  // get user info for single user
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
+      ChatUser chatuser) {
+    return Api.firestore
+        .collection('users')
+        .where('id', isEqualTo: chatuser.id)
+        .snapshots();
+  }
+
+  //  this api will update to last_active and is_online field
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    firestore.collection('users').doc(user.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString()
+    });
+  }
+
   static updateInfo() {
     print("chal bhai tu update kr");
     return Api.firestore
@@ -80,7 +97,7 @@ class Api {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
       ChatUser user) {
     return Api.firestore
-        .collection('chats/${getConversationID(user.id!)}/messages/')
+        .collection('chats/${getConversationID(user.id!)}/messages/').orderBy('sent', descending: true)
         .snapshots();
   }
 
@@ -126,10 +143,11 @@ class Api {
         .snapshots();
   }
 
- static Future<void> loginUser() async {
+  static Future<void> loginUser() async {
     final current_user = auth.currentUser;
-    await firestore.collection('users').doc(current_user!.uid).update({
-      'isOnline': true
-    });
+    await firestore
+        .collection('users')
+        .doc(current_user!.uid)
+        .update({'isOnline': true});
   }
 }

@@ -10,7 +10,7 @@ class Mydatetimeutil {
     return TimeOfDay.fromDateTime(datatime).format(context);
   }
 
-  static String getLastMessage(
+  static String getlastMessageTime(
       {required BuildContext context, required String sent_time}) {
     final DateTime datetime =
         DateTime.fromMillisecondsSinceEpoch(int.parse(sent_time));
@@ -25,6 +25,36 @@ class Mydatetimeutil {
     }
     // print('${_getMonth(datetime)}');
     return '${datetime.day} ${_getMonth(datetime)}';
+  }
+
+  static String joined_time({required BuildContext context ,required String create_time}){
+    final DateTime datetime =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(create_time));
+      return '${datetime.day} ${_getMonth(datetime)} ${datetime.year}';
+  }
+
+  static String getLastTimeActive(
+      {required BuildContext context, required String lastactive}) {
+    final int i = int.tryParse(lastactive) ?? -1;
+
+    if (i == 1) return "Last Seen Not Available";
+
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(i);
+    DateTime today = DateTime.now();
+
+    String formattedTime = TimeOfDay.fromDateTime(time).format(context);
+
+    if (time.day == today.day &&
+        time.month == today.month &&
+        time.year == today.year) {
+      return "last seen today at $formattedTime";
+    }
+
+    if (today.difference(time).inHours / 24.round() == 1) {
+      return "last seen yesterday at $formattedTime";
+    }
+    String month = _getMonth(time);
+    return "last seen on ${time.day} $month on $formattedTime";
   }
 
   static String _getMonth(DateTime date) {

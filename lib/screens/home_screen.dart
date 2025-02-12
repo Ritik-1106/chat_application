@@ -1,10 +1,14 @@
 import "package:chit_chat/Api/api.dart";
+import "package:chit_chat/helper/Dialogue.dart";
+import "package:chit_chat/helper/font_styling.dart";
 import "package:chit_chat/models/Chat_User.dart";
 import "package:chit_chat/screens/auth/login_screen.dart";
 import "package:chit_chat/screens/profile_screen.dart";
 import "package:chit_chat/widgets/chat_user_card.dart";
+import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:google_sign_in/google_sign_in.dart";
 
 class HomeScreen extends StatefulWidget {
@@ -21,9 +25,28 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSearching = false;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     Api.getSelfInfo();
+    // first we need show user is active when application will start
+
+   Api.updateActiveStatus(true);
+
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      if (Api.auth.currentUser != null) {
+        print("abhi current user null nhi h");
+        if (message.toString().contains('resumed')) {
+          print("abhi resume h screen ");
+          Api.updateActiveStatus(true);
+        }
+        if (message.toString().contains('pause')) {
+          Api.updateActiveStatus(false);
+        print("abhi pause h screen ");
+        }
+      }
+
+      return Future.value(message);
+    });
   }
 
   @override
@@ -75,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               }
                             });
                           })
-                      : Text("Chit Chat"),
+                      : Text("Chit&Chat", style: FontStyling.title01()),
                   actions: [
                     IconButton(
                         onPressed: () {
@@ -100,6 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       builder: (_) => ProfileScreen(
                                           user: Api.selfuserinfo)));
                             } else if (value == 'Logout') {
+                              // First, update Firestore before signing out
+                              await Api.updateActiveStatus(false);
                               // Perform Logout
                               await Api.auth.signOut().then((onValue) async {
                                 await GoogleSignIn().signOut().then((onValue) {
@@ -108,6 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (_) => LoginScreen()));
+
+                                  // we are new instance intailze
+                                  Api.auth = FirebaseAuth.instance;
+                                  // show snak bar
+                                  Dialogue.showSnakbar(
+                                      context,
+                                      "Sign Out Successfully",
+                                      Icons.back_hand,
+                                      25);
                                 });
                               });
                             }
@@ -181,10 +215,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           }
                       }
-                    })
-                    )
-                    )
-                    );
+                    }))));
   }
-
 }
