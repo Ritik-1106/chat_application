@@ -21,7 +21,7 @@ class Mydatetimeutil {
     if (now.day == datetime.day &&
         now.month == datetime.month &&
         now.year == datetime.year) {
-      return TimeOfDay.fromDateTime(datetime).format(context);
+      return TimeOfDay.fromDateTime(datetime).format(context) + " Today";
     }
     // print('${_getMonth(datetime)}');
     return showyear ? '${datetime.day} ${_getMonth(datetime)} ${datetime.year}' : '${datetime.day} ${_getMonth(datetime)}';
