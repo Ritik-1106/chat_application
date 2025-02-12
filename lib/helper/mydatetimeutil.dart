@@ -11,7 +11,7 @@ class Mydatetimeutil {
   }
 
   static String getlastMessageTime(
-      {required BuildContext context, required String sent_time}) {
+      {required BuildContext context, required String sent_time, bool showyear = false}) {
     final DateTime datetime =
         DateTime.fromMillisecondsSinceEpoch(int.parse(sent_time));
 
@@ -24,14 +24,10 @@ class Mydatetimeutil {
       return TimeOfDay.fromDateTime(datetime).format(context);
     }
     // print('${_getMonth(datetime)}');
-    return '${datetime.day} ${_getMonth(datetime)}';
+    return showyear ? '${datetime.day} ${_getMonth(datetime)} ${datetime.year}' : '${datetime.day} ${_getMonth(datetime)}';
   }
 
-  static String joined_time({required BuildContext context ,required String create_time}){
-    final DateTime datetime =
-        DateTime.fromMillisecondsSinceEpoch(int.parse(create_time));
-      return '${datetime.day} ${_getMonth(datetime)} ${datetime.year}';
-  }
+ 
 
   static String getLastTimeActive(
       {required BuildContext context, required String lastactive}) {

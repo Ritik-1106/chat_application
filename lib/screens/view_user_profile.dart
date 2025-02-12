@@ -111,9 +111,10 @@ final ImagePicker picker = ImagePicker();
                   ),
                   SizedBox(height: screensize.height * 0.33),
 
-                  Text("joined on "+ Mydatetimeutil.joined_time(context: context, create_time: widget.user.createAt!)
-                    
-                 ,style: TextStyle(color: Colors.black54, fontSize: 16),)
+                  Text("joined on "+ Mydatetimeutil.getlastMessageTime(context: context, sent_time: widget.user.createAt!, showyear: true)
+                  ,
+                    style: TextStyle(color: Colors.black54, fontSize: 16),
+                 )
                  
                 ],
               ),
