@@ -3,8 +3,11 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chit_chat/Api/api.dart';
+import 'package:chit_chat/helper/mydatetimeutil.dart';
+import 'package:chit_chat/helper/ui_helper.dart';
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:chit_chat/models/Message.dart';
+import 'package:chit_chat/screens/view_user_profile.dart';
 import 'package:chit_chat/widgets/message_card.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
@@ -23,15 +26,13 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   List<Message> _list = [];
   final _texteditingcontroller = TextEditingController();
-
   bool _isshowEmoji = false;
-
+  
+  // this is initstate when this screen will build firstly this is first method that will call or intialize 
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 300), () {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white, statusBarColor: Colors.blue));
+      UIHelper.setDefaultUIStyle();
     });
   }
 
@@ -42,21 +43,21 @@ class _ChatScreenState extends State<ChatScreen> {
         FocusScope.of(context).unfocus();
       },
       child: SafeArea(
-        // with the help of popscope when you try to back first of 
-        //all emoji section will hide and you will back from screen 
+        // with the help of popscope when you try to back first of
+        //all emoji section will hide and you will back from screen
         child: PopScope(
-            canPop: !_isshowEmoji,
-            onPopInvokedWithResult: (didPop, result) {
-              if (_isshowEmoji) {
-                setState(() {
-                  _isshowEmoji = !_isshowEmoji;
-                });
-              } else {
-                // Exit the app if not searching
-                Navigator.of(context).maybePop();
-              }
-            },
-            child: Scaffold(
+          canPop: !_isshowEmoji,
+          onPopInvokedWithResult: (didPop, result) {
+            if (_isshowEmoji) {
+              setState(() {
+                _isshowEmoji = !_isshowEmoji;
+              });
+            } else {
+              // Exit the app if not searching
+              Navigator.of(context).maybePop();
+            }
+          },
+          child: Scaffold(
             backgroundColor: Colors.blue.shade100,
             appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -84,9 +85,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ?.map((e) => Message.fromJson(e.data()))
                                     .toList() ??
                                 [];
-          
+
                             if (_list.isNotEmpty) {
                               return ListView.builder(
+                                  // this reverse parameter automatically scroll on latest message or last message
+                                  reverse: true,
                                   // if issearch is true so we will show searchlist otherwise list
                                   itemCount: _list.length,
                                   physics: BouncingScrollPhysics(),
@@ -149,58 +152,81 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _appbar() {
     return InkWell(
-      onTap: () {},
-      child: Row(
-        children: [
-          IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.arrow_back, color: Colors.white)),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 3.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: CachedNetworkImage(
-                height: 50,
-                width: 60,
-                fit: BoxFit.cover,
-                imageUrl: widget.user.image.toString(),
-                // placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => CircleAvatar(
-                  backgroundColor: Colors.grey.shade300,
-                  child: Icon(CupertinoIcons.person),
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => ViewUserProfile(user: widget.user)));
+      },
+      child: StreamBuilder(
+        stream: Api.getUserInfo(widget.user),
+        builder: (context, snapshot) {
+          final data = snapshot.data?.docs;
+          final list =
+              data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
+          if (list.isNotEmpty) {}
+
+          return Row(
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back, color: Colors.white)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 3.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: CachedNetworkImage(
+                    height: 50,
+                    width: 60,
+                    fit: BoxFit.cover,
+                    imageUrl: widget.user.image.toString(),
+                    // placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: Colors.grey.shade300,
+                      child: Icon(CupertinoIcons.person),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.user.name.toString(),
-                style: TextStyle(
-                    fontSize: 16,
-                    letterSpacing: 1.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600),
+              SizedBox(
+                width: 10,
               ),
-              SizedBox(height: 1),
-              Text(
-                "ritik Nagar",
-                style: TextStyle(
-                    fontSize: 14,
-                    letterSpacing: 1.0,
-                    color: Colors.white54,
-                    fontWeight: FontWeight.w400),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.user.name.toString(),
+                    style: TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 1.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 1),
+                  Text(
+                    list.isNotEmpty
+                        ? list[0].isOnline!
+                            ? 'Online'
+                            : Mydatetimeutil.getLastTimeActive(
+                                context: context,
+                                lastactive: list[0].lastActive.toString())
+                        : Mydatetimeutil.getLastTimeActive(
+                            context: context,
+                            lastactive: widget.user.lastActive.toString()),
+                    style: TextStyle(
+                        fontSize: 14,
+                        letterSpacing: 1.0,
+                        color: Colors.white54,
+                        fontWeight: FontWeight.w400),
+                  )
+                ],
               )
             ],
-          )
-        ],
+          );
+        },
       ),
     );
   }
@@ -228,10 +254,11 @@ class _ChatScreenState extends State<ChatScreen> {
                           size: 25, color: Colors.blue)),
                   Expanded(
                       child: TextField(
+                          enableInteractiveSelection: false,
                           onTap: () {
                             if (_isshowEmoji) {
-                              // isemoji is true it means emoji keyborad is open first we need to close 
-                              // then open simple keyboard 
+                              // isemoji is true it means emoji keyborad is open first we need to close
+                              // then open simple keyboard
                               setState(() {
                                 _isshowEmoji = !_isshowEmoji;
                               });

@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chit_chat/Api/api.dart';
 import 'package:chit_chat/helper/Dialogue.dart';
+import 'package:chit_chat/helper/font_styling.dart';
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:chit_chat/screens/auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -34,11 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
-          title: Text(
-            " User Profile",
-            style: TextStyle(
-                fontSize: 30, fontStyle: FontStyle.normal, color: Colors.white),
-          ),
+          title: Text("MY Profile", style: FontStyling.title01()),
         ),
         body: Form(
           key: _formkey,
@@ -171,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         }
                       },
                       icon: Icon(Icons.update_rounded),
-                      label: Text("Update"),
+                      label: Text("Update", style: FontStyling.button_text(Colors.white, 14)),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
@@ -185,16 +183,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             Dialogue.progressIndicator(context);
+
+            // First, update Firestore before signing out
+            await Api.updateActiveStatus(false);
             await Api.auth.signOut().then((onValue) async {
               await GoogleSignIn().signOut().then((onValue) {
+
+                
+                              
                 Navigator.pop(context);
 
                 // for moving to home screen
                 Navigator.pop(context);
 
-                // replacing home screen with login screen
+
+              // we are new instance intailze 
+                Api.auth = FirebaseAuth.instance;
+
+                
+               // replacing home screen with login screen
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => LoginScreen()));
+
+                
+
+
                 Dialogue.showSnakbar(
                     context, "Sign Out Successfully", Icons.back_hand, 25);
               });
@@ -202,8 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           backgroundColor: Colors.blue,
           icon: Icon(Icons.logout, color: Colors.white),
-          label: Text("Logout",
-              style: TextStyle(color: Colors.white, fontSize: 20)),
+          label: Text("LogOut", style: FontStyling.button_text(Colors.white, 16)),
         ),
       ),
     );

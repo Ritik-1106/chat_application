@@ -1,4 +1,5 @@
 import 'package:chit_chat/Api/api.dart';
+import 'package:chit_chat/helper/font_styling.dart';
 import 'package:chit_chat/helper/mydatetimeutil.dart';
 import 'package:chit_chat/models/Chat_User.dart';
 import 'package:chit_chat/models/Message.dart';
@@ -25,13 +26,11 @@ class _MessageCardState extends State<MessageCard> {
         : _blueMessage(screensize);
   }
 
-  // i am creating two different that will decide msg send by current user or anther user
-  // if current user uid and formid is same it means this msg send by current user and we will show blue colur widget
+  // I am creating two different that will decide msg send by current user or anther user
+  // IF reciever and sender are different and i want to update msg that sent from my side to other side
   Widget _blueMessage(Size screensize) {
-  //if reciever and sender are different and i want to update msg that sent from my side to other side
-    if ((widget.message.read ?? "").isEmpty) {
-      Api.updateMessagesReadStatus(widget.message);
-      print("msg are updated");
+    if ((widget.message.read ?? "").isEmpty){
+      Api.updateMessagesReadStatus(widget.message); 
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -40,9 +39,8 @@ class _MessageCardState extends State<MessageCard> {
           child: Container(
             margin: EdgeInsets.all(screensize.width * .04),
             padding: EdgeInsets.all(screensize.width * .04),
-            child: Text(widget.message.msg.toString(),
-                style: TextStyle(
-                    fontSize: 15, letterSpacing: 1.0, color: Colors.black87)),
+            child: Text(widget.message.msg!,
+                style: FontStyling.chating_text_style(Colors.black, 15)),
             decoration: BoxDecoration(
               color: Colors.blue.shade200,
               borderRadius: BorderRadius.only(
@@ -88,9 +86,10 @@ class _MessageCardState extends State<MessageCard> {
           child: Container(
             margin: EdgeInsets.all(screensize.width * .04),
             padding: EdgeInsets.all(screensize.width * .04),
-            child: Text(widget.message.msg.toString(),
-                style: TextStyle(
-                    fontSize: 15, letterSpacing: 1.0, color: Colors.black)),
+            child: Text(widget.message.msg!, style: FontStyling.chating_text_style(Colors.black, 15))
+            
+            
+           ,
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
               borderRadius: BorderRadius.only(
@@ -101,7 +100,7 @@ class _MessageCardState extends State<MessageCard> {
             ),
           ),
         ),
-      ],
+       ],
     );
   }
 }

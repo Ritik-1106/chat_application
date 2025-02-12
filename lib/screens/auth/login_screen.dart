@@ -3,6 +3,7 @@ import "dart:math";
 
 import "package:chit_chat/Api/api.dart";
 import "package:chit_chat/helper/dialogue.dart";
+import "package:chit_chat/helper/font_styling.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -33,15 +34,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _signInGoogleBtnClick() {
     // my progress indicator are showing
-    print("heloo sun rhah mc");
     Dialogue.progressIndicator(context);
     _signInWithGoogle().then((user) async {
       // my progress bar hiding or remove from stack
       Navigator.pop(context);
       print("kya bhai tu null h kya meetha h kya");
-      print(user);
+     
       if (user == null) {
-        print("bhag ja re nulle teri mc");
+        print("bhag ja re nulle teri mc user yhe pr null h bhai ..................");
       }
       if (user != null) {
         if (await Api.userExist()) {
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         // after login we will isonline as true 
-        Api.loginUser();
+       
         
       }
     });
@@ -101,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("Welcome to chat "),
+        title: Text("Welcome To App", style: FontStyling.title01()),
       ),
       body: Stack(
         children: [
@@ -122,10 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // this function will call while click sign in with google button
                     _signInGoogleBtnClick();
                   },
-                  label: Text(
-                    "Sign In With Google",
-                    style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-                  ),
+                  label: Text("Sign In With Google", style: FontStyling.button_text(Colors.blue, 18)),
                   icon: Image.asset(
                     "images/google.png",
                     height: mq.height * .05,

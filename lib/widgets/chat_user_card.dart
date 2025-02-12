@@ -106,7 +106,7 @@ class _ChatUserCardState extends State<ChatUserCard> {
                             
                             Text(
  
-                                Mydatetimeutil.getLastMessage(
+                                Mydatetimeutil.getlastMessageTime(
                                     context: context,
                                     sent_time: _message!.sent.toString()),
                                 style: TextStyle(
